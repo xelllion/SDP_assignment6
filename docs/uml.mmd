@@ -1,0 +1,68 @@
+classDiagram
+direction TB
+class Element {
+  <<interface>>
+  +getName() String
+  +accept(Visitor) void
+}
+class Visitor {
+  <<interface>>
+  +visit(FileNode) void
+  +visit(DirectoryNode) void
+}
+class Node {
+  <<abstract>>
+  -String name
+  -DirectoryNode parent
+  +getName() String
+  +getParent() DirectoryNode
+}
+class FileNode {
+  -long size
+  +getSize() long
+  +accept(Visitor) void
+}
+class DirectoryNode {
+  -List~Node~ children
+  +add(Node) void
+  +getChildren() List~Node~
+  +accept(Visitor) void
+}
+class TraversingVisitor {
+  <<abstract>>
+  -String currentPath
+  -int currentDepth
+  +execute(Element) void
+  +visit(FileNode) void
+  +visit(DirectoryNode) void
+  #reset() void
+  #onFile(FileNode, String, int) void
+  #onDirectory(DirectoryNode, String, int) void
+}
+class TotalSizeVisitor {
+  -long totalSize
+  +getTotalSize() long
+}
+class SearchVisitor {
+  -String namePart
+  -long minimumSize
+  -List~String~ matches
+  +getMatches() List~String~
+}
+class StatisticsVisitor {
+  -int fileCount
+  -int directoryCount
+  -int maximumDepth
+  +getFileCount() int
+  +getDirectoryCount() int
+  +getMaximumDepth() int
+}
+Element <|.. Node
+Node <|-- FileNode
+Node <|-- DirectoryNode
+DirectoryNode "0..1" *-- "0..*" Node : owns
+Element ..> Visitor : accepts
+Visitor <|.. TraversingVisitor
+TraversingVisitor <|-- TotalSizeVisitor
+TraversingVisitor <|-- SearchVisitor
+TraversingVisitor <|-- StatisticsVisitor
