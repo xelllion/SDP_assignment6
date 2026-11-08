@@ -1,0 +1,7 @@
+target/
+.idea/
+*.iml
+*.class
+*.docx
+*.pdf
+.DS_Store
