@@ -134,4 +134,48 @@ class VisitorsTest {
         total.execute(new FileNode("ok", 2));
         assertEquals(2, total.getTotalSize());
     }
+
+    @Test
+    void statisticsCountAllNodesIncludingRoot() {
+        StatisticsVisitor stats = new StatisticsVisitor();
+        stats.execute(tree());
+        assertEquals(4, stats.getFileCount());
+        assertEquals(4, stats.getDirectoryCount());
+        assertEquals(3, stats.getMaximumDepth());
+    }
+
+    @Test
+    void statisticsResetForRepeatedRunsEmptyDirectoryAndFileRoot() {
+        StatisticsVisitor stats = new StatisticsVisitor();
+        DirectoryNode root = tree();
+        for (int run = 0; run < 2; run++) {
+            stats.execute(root);
+            assertEquals(4, stats.getFileCount());
+            assertEquals(4, stats.getDirectoryCount());
+            assertEquals(3, stats.getMaximumDepth());
+        }
+        stats.execute(new DirectoryNode("empty"));
+        assertEquals(0, stats.getFileCount());
+        assertEquals(1, stats.getDirectoryCount());
+        assertEquals(0, stats.getMaximumDepth());
+        stats.execute(new FileNode("only", 0));
+        assertEquals(1, stats.getFileCount());
+        assertEquals(0, stats.getDirectoryCount());
+        assertEquals(0, stats.getMaximumDepth());
+    }
+
+    @Test
+    void depthIncludesEmptyDirectoriesAndStartsAtChosenRoot() {
+        DirectoryNode outside = new DirectoryNode("outside");
+        DirectoryNode chosen = new DirectoryNode("chosen");
+        DirectoryNode nested = new DirectoryNode("nested");
+        outside.add(chosen);
+        chosen.add(nested);
+        nested.add(new DirectoryNode("empty"));
+        StatisticsVisitor stats = new StatisticsVisitor();
+        stats.execute(chosen);
+        assertEquals(0, stats.getFileCount());
+        assertEquals(3, stats.getDirectoryCount());
+        assertEquals(2, stats.getMaximumDepth());
+    }
 }
